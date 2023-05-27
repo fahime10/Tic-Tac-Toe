@@ -4,11 +4,12 @@ const gameBoard = (() => {
 
     const createContent = () => {
         let HTMLBoard = "";
-        gameBoard.forEach((square, index) => {
-            HTMLBoard += `<div class="square" id="square-${index}">${square}</div>`;
+        gameBoard.forEach((box, index) => {
+            HTMLBoard += `<div class="box" id="box-${index}">${box}</div>`;
         });
         document.querySelector("#game-board").innerHTML = HTMLBoard;
-        const squares = document.querySelectorAll(".square");
+        document.querySelector("#game-board").style.display = "grid";
+        const squares = document.querySelectorAll(".box");
         squares.forEach((square) => {
             square.addEventListener("click", game.placeMarker);
         });
@@ -16,7 +17,7 @@ const gameBoard = (() => {
 
     // allows to put the player's marker on clicked square index
     // and re-render the HTML
-    const update = (index, value) => {
+    const updateContent = (index, value) => {
         gameBoard[index] = value;
         createContent();
     }
@@ -24,7 +25,7 @@ const gameBoard = (() => {
     // this is necessary to be able to use the functions outside of the const
     return {
         createContent,
-        update
+        updateContent
     }
 })();
 
@@ -42,7 +43,7 @@ const game = (() => {
     let currentPlayerIndex;
     let gameOver;
 
-    const start = () => {
+    const startGame = () => {
         players = [
             createPlayer(document.querySelector("#player-1").value, "X"),
             createPlayer(document.querySelector("#player-2").value, "O")
@@ -51,7 +52,7 @@ const game = (() => {
         currentPlayerIndex = 0;
         gameOver = false;
         gameBoard.createContent();
-        const squares = document.querySelectorAll(".square");
+        const squares = document.querySelectorAll(".box");
         squares.forEach((square) => {
             square.addEventListener("click", placeMarker);
         });
@@ -59,16 +60,18 @@ const game = (() => {
 
     const placeMarker = (event) => {
         let index = parseInt(event.target.id.split("-")[1]);
-        gameBoard.update(index, players[currentPlayerIndex].marker);
+        gameBoard.updateContent(index, players[currentPlayerIndex].marker);
+
+        currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
     }
 
     return {
-        start,
+        startGame,
         placeMarker,
     }
 })();
 
 const startBtn = document.getElementById("start-game-btn");
 startBtn.addEventListener("click", () => {
-    game.start();
+    game.startGame();
 })
