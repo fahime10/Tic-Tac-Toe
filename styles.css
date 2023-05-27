@@ -19,14 +19,13 @@ body {
 }
 
 #game-board {
-    /* display: none; */
-    display: grid;
+    display: none;
     grid-template-columns: 95px 95px 95px;
     grid-template-rows: 95px 95px 95px;
     margin: 1rem 0 1rem 39%;
 }
 
-#game-board > .square {
+#game-board > .box {
     height: 90px;
     width: 90px;
     border: 5px solid black;
