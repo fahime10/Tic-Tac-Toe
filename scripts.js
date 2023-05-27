@@ -22,10 +22,25 @@ const gameBoard = (() => {
         createContent();
     }
 
+    const getGameBoardIndex = (index) => {
+        return gameBoard[index];
+    }
+
+    // check the whether the gameboard at that index has a value in it
+    const checkValue = function(value) {
+        if (value !== "") {
+            return false;
+        } else {
+            return true;
+        }
+    } 
+
     // this is necessary to be able to use the functions outside of the const
     return {
         createContent,
-        updateContent
+        updateContent,
+        getGameBoardIndex,
+        checkValue
     }
 })();
 
@@ -56,13 +71,17 @@ const game = (() => {
         squares.forEach((square) => {
             square.addEventListener("click", placeMarker);
         });
+        document.querySelector("#start-game-btn").disabled = true;
+        document.querySelector("#reset-game-btn").disabled = false;
     }
 
     const placeMarker = (event) => {
         let index = parseInt(event.target.id.split("-")[1]);
-        gameBoard.updateContent(index, players[currentPlayerIndex].marker);
 
-        currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
+        if (gameBoard.checkValue(gameBoard.getGameBoardIndex(index))) {
+            gameBoard.updateContent(index, players[currentPlayerIndex].marker);
+            currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
+        }
     }
 
     return {
@@ -74,4 +93,4 @@ const game = (() => {
 const startBtn = document.getElementById("start-game-btn");
 startBtn.addEventListener("click", () => {
     game.startGame();
-})
+});
