@@ -2,6 +2,7 @@
 const gameBoard = (() => {
     let gameBoard = ["", "", "", "", "", "", "", "", ""];
 
+    // create the game board using divs and update accordingly
     const createContent = () => {
         let HTMLBoard = "";
         gameBoard.forEach((box, index) => {
@@ -22,6 +23,12 @@ const gameBoard = (() => {
         createContent();
     }
 
+    // get the whole game board array
+    const getGameBoard = () => {
+        return gameBoard;
+    }
+
+    // get the value at that index in the game board
     const getGameBoardIndex = (index) => {
         return gameBoard[index];
     }
@@ -39,6 +46,7 @@ const gameBoard = (() => {
     return {
         createContent,
         updateContent,
+        getGameBoard,
         getGameBoardIndex,
         checkValue
     }
@@ -51,6 +59,47 @@ const createPlayer = (name, marker) => {
         marker
     }
 }
+
+// check any row of three markers
+function checkWin(board) {
+    const winningCombos = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+    ];
+
+    for (let i = 0; i < winningCombos.length; i++) {
+        const [a, b, c] = winningCombos[i];
+
+        if (board[a] && 
+            board[a] === board[b] && 
+            board[a] === board[c]) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// check that every cell ("box") is not empty, else declare tie (as return "true")
+function checkTie(board) {
+    return board.every(box => box !== "");
+}
+
+const displayController = (() => {
+    const writeResult = (result) => {
+        document.querySelector("#result").innerHTML = result;
+    }
+
+    return {
+        writeResult,
+    }
+})();
 
 // this is to keep track of the game flow
 const game = (() => {
@@ -81,16 +130,29 @@ const game = (() => {
         }
     }
 
+    // this is to place the marker on the clicked box and check if a triple markers' line is 
+    // formed for the win or tie
     const placeMarker = (event) => {
-        let index = parseInt(event.target.id.split("-")[1]);
-        let value = gameBoard.getGameBoardIndex(index);
+        if (!gameOver) {
+            let index = parseInt(event.target.id.split("-")[1]);
+            let value = gameBoard.getGameBoardIndex(index);
 
-        if (gameBoard.checkValue(value)) {
-            gameBoard.updateContent(index, players[currentPlayerIndex].marker);
-            currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
+            if (gameBoard.checkValue(value)) {
+                gameBoard.updateContent(index, players[currentPlayerIndex].marker);
+                if (checkWin(gameBoard.getGameBoard(), players[currentPlayerIndex].marker)) {
+                    gameOver = true;
+                    displayController.writeResult(`${players[currentPlayerIndex].name} wins!`);
+                } else if (checkTie(gameBoard.getGameBoard())) {
+                    gameOver = true;
+                    displayController.writeResult("Tie!");
+                }
+
+                currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
+            }
         }
     }
 
+    // this is to reset the game, by removing the game board and resetting the player names
     const resetGame = () => {
         for (let i = 0; i < 9; i ++) {
             gameBoard.updateContent(i, "");
@@ -103,6 +165,9 @@ const game = (() => {
         document.querySelector("#reset-game-btn").disabled = true;
         document.querySelector("#player-1").disabled = false;
         document.querySelector("#player-2").disabled = false;
+        document.querySelector("#prompt").style.display = "block";
+        document.querySelector("#result").textContent = "";
+        gameOver = false;
     }
 
     return {
