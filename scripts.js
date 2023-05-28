@@ -1,4 +1,4 @@
-// this is to create the HTML for the game board
+// this is to create the HTML for the game board and update accordingly
 const gameBoard = (() => {
     let gameBoard = ["", "", "", "", "", "", "", "", ""];
 
@@ -9,13 +9,13 @@ const gameBoard = (() => {
         });
         document.querySelector("#game-board").innerHTML = HTMLBoard;
         document.querySelector("#game-board").style.display = "grid";
-        const squares = document.querySelectorAll(".box");
-        squares.forEach((square) => {
-            square.addEventListener("click", game.placeMarker);
+        const boxes = document.querySelectorAll(".box");
+        boxes.forEach((box) => {
+            box.addEventListener("click", game.placeMarker);
         });
     }
 
-    // allows to put the player's marker on clicked square index
+    // allows to put the player's marker on clicked box index
     // and re-render the HTML
     const updateContent = (index, value) => {
         gameBoard[index] = value;
@@ -59,38 +59,65 @@ const game = (() => {
     let gameOver;
 
     const startGame = () => {
-        players = [
-            createPlayer(document.querySelector("#player-1").value, "X"),
-            createPlayer(document.querySelector("#player-2").value, "O")
-        ];
-
-        currentPlayerIndex = 0;
-        gameOver = false;
-        gameBoard.createContent();
-        const squares = document.querySelectorAll(".box");
-        squares.forEach((square) => {
-            square.addEventListener("click", placeMarker);
-        });
-        document.querySelector("#start-game-btn").disabled = true;
-        document.querySelector("#reset-game-btn").disabled = false;
+        if (document.querySelector("#player-1").value !== "" && 
+            document.querySelector("#player-2").value !== "") {
+                players = [
+                    createPlayer(document.querySelector("#player-1").value, "X"),
+                    createPlayer(document.querySelector("#player-2").value, "O")
+                ];
+        
+                currentPlayerIndex = 0;
+                gameOver = false;
+                gameBoard.createContent();
+                const boxes = document.querySelectorAll(".box");
+                boxes.forEach((box) => {
+                    box.addEventListener("click", placeMarker);
+                });
+                document.querySelector("#start-game-btn").disabled = true;
+                document.querySelector("#reset-game-btn").disabled = false;
+                document.querySelector("#prompt").style.display = "none";
+                document.querySelector("#player-1").disabled = true;
+                document.querySelector("#player-2").disabled = true;
+        }
     }
 
     const placeMarker = (event) => {
         let index = parseInt(event.target.id.split("-")[1]);
+        let value = gameBoard.getGameBoardIndex(index);
 
-        if (gameBoard.checkValue(gameBoard.getGameBoardIndex(index))) {
+        if (gameBoard.checkValue(value)) {
             gameBoard.updateContent(index, players[currentPlayerIndex].marker);
             currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
         }
     }
 
+    const resetGame = () => {
+        for (let i = 0; i < 9; i ++) {
+            gameBoard.updateContent(i, "");
+        }
+
+        document.querySelector("#game-board").style.display = "none";
+        document.querySelector("#player-1").value = "";
+        document.querySelector("#player-2").value = "";
+        document.querySelector("#start-game-btn").disabled = false;
+        document.querySelector("#reset-game-btn").disabled = true;
+        document.querySelector("#player-1").disabled = false;
+        document.querySelector("#player-2").disabled = false;
+    }
+
     return {
         startGame,
         placeMarker,
+        resetGame,
     }
 })();
 
 const startBtn = document.getElementById("start-game-btn");
 startBtn.addEventListener("click", () => {
     game.startGame();
+});
+
+const resetBtn = document.getElementById("reset-game-btn");
+resetBtn.addEventListener("click", () => {
+    game.resetGame();
 });
